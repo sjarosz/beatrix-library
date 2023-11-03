@@ -1,198 +1,200 @@
-import 'dart:convert'; // Import Dart's built-in JSON encoder and decoder.
-import 'dart:io'; // Import Dart's IO library for file and network IO operations.
-import 'package:http/http.dart'
-    as http; // Import the HTTP package for making HTTP requests.
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
 
-/**
- * This Dart class, LiveJsonData, provides a convenient way to handle 
- * live JSON data from both HTTP and local file sources. 
- * It supports reading, adding, updating, deleting, and saving JSON data, 
- * along with converting it to a string representation.
- */
-
-/// A class to handle live JSON data, which can be read from a file or an HTTP source.
+/// A class that manages reading and writing JSON data from either a local file
+/// or a remote HTTP source.
 class LiveJsonData {
-  final String _source; // The source URI as a string.
-  dynamic
-      _data; // The actual data read from the source, can be a Map or a List.
+  // Private variable to store the source URI as a string.
+  final String _source;
 
-  /// Constructor requiring a source URI as a string.
+  // Variable to hold the data in memory after it's read from the source.
+  dynamic _data;
+
+  // Constructor that initializes the class with a given source URI.
   LiveJsonData(this._source);
 
-  /// Asynchronously reads JSON data from the provided source.
+  /// Public method to read data from the initialized source.
+  /// It determines the source type (HTTP or file) and calls the appropriate read method.
   Future<void> read() async {
-    try {
-      Uri uri =
-          Uri.parse(_source); // Parse the source string into a Uri object.
-      if (uri.scheme.startsWith('http')) {
-        // If the scheme is HTTP(S), we fetch the data from the network.
-        final response = await http.get(uri); // Perform an HTTP GET request.
-        if (response.statusCode == 200) {
-          // If the response is OK (status code 200), decode the JSON data.
-          _data = jsonDecode(response.body);
-        } else {
-          // If the response is not OK, throw an exception.
-          throw Exception(
-              'Failed to load data with status code: ${response.statusCode}');
-        }
-      } else {
-        // If the scheme is not HTTP(S), assume it's a file path and read from the file.
-        final file = File(_source);
-        _data = jsonDecode(await file
-            .readAsString()); // Read and decode the JSON data from the file.
-      }
-    } catch (e) {
-      // Catch and rethrow exceptions with a more specific message.
-      throw Exception('Failed to read data: $e');
+    Uri uri = Uri.parse(_source);
+    if (uri.scheme.startsWith('http')) {
+      await _readFromHttp(uri);
+    } else {
+      await _readFromFile(uri);
     }
   }
 
-  /// Adds a new entry to the JSON structure at the specified path.
-  bool add(List<dynamic> path, dynamic newEntry) {
-    dynamic parent =
-        getElementAt(path); // Navigate to the parent element of the path.
+  /// Reads data from an HTTP source and decodes the JSON response.
+  Future<void> _readFromHttp(Uri uri) async {
+    final response = await http.get(uri);
+    if (response.statusCode == 200) {
+      _data = jsonDecode(response.body);
+    } else {
+      throw Exception(
+          'Failed to load data with status code: ${response.statusCode}');
+    }
+  }
+
+  /// Reads data from a file and decodes the JSON content.
+  Future<void> _readFromFile(Uri uri) async {
+    final file = File(uri.toFilePath());
+    _data = jsonDecode(await file.readAsString());
+  }
+
+  /// Public method to save data to the initialized source.
+  /// It determines the source type (HTTP or file) and calls the appropriate save method.
+  Future<void> save() async {
+    Uri uri = Uri.parse(_source);
+    if (uri.scheme.startsWith('http')) {
+      await _saveToHttp(uri);
+    } else {
+      await _saveToFile(uri);
+    }
+  }
+
+  /// Placeholder for saving data to an HTTP source.
+  /// The actual implementation depends on the specific backend API used.
+  Future<void> _saveToHttp(Uri uri) async {
+    throw UnimplementedError('Saving to HTTP sources is not implemented.');
+  }
+
+  /// Saves the in-memory data back to a file in JSON format.
+  Future<void> _saveToFile(Uri uri) async {
+    final file = File(uri.toFilePath());
+    await file.writeAsString(jsonEncode(_data));
+  }
+
+  /// Public method to add a new entry to the JSON data at the specified path.
+  Future<bool> add(List<dynamic> path, dynamic newEntry) async {
+    Uri uri = Uri.parse(_source);
+    return uri.scheme.startsWith('http')
+        ? await _addToHttp(uri, path, newEntry)
+        : await _addToFile(path, newEntry);
+  }
+
+  /// Placeholder for adding a new entry to an HTTP source.
+  Future<bool> _addToHttp(Uri uri, List<dynamic> path, dynamic newEntry) async {
+    throw UnimplementedError('Adding to HTTP sources is not implemented.');
+  }
+
+  /// Adds a new entry to the data in memory and saves the updated data to a file.
+  Future<bool> _addToFile(List<dynamic> path, dynamic newEntry) async {
+    dynamic parent = getElementAt(path);
     if (parent is List) {
-      // If the parent element is a list, add the new entry to the list.
       parent.add(newEntry);
+      await _saveToFile(Uri.file(_source));
       return true;
     } else if (parent is Map) {
-      // If the parent element is a map, merge the new entry with the map.
       if (newEntry is! Map) {
-        // Ensure the new entry is also a map.
         throw Exception(
             'New entry must be a Map to add to a Map data structure');
       }
       parent.addAll(newEntry);
+      await _saveToFile(Uri.file(_source));
       return true;
     }
-    return false; // If the parent element is neither a list nor a map, return false.
+    return false;
   }
 
-  /// Updates the value at the specified path in the JSON structure.
-  bool update(List<dynamic> path, dynamic value) {
-    if (_data == null || path.isEmpty)
-      return false; // If the data is null or path is empty, return false.
-    dynamic parent = getElementAt(path.sublist(
-        0, path.length - 1)); // Navigate to the parent element of the path.
-    final keyOrIndex = path
-        .last; // The last element of the path is the key or index to update.
+  /// Public method to update an existing entry in the JSON data at the specified path.
+  Future<bool> update(List<dynamic> path, dynamic value) async {
+    Uri uri = Uri.parse(_source);
+    return uri.scheme.startsWith('http')
+        ? await _updateToHttp(uri, path, value)
+        : await _updateToFile(path, value);
+  }
 
+  /// Placeholder for updating an existing entry in an HTTP source.
+  Future<bool> _updateToHttp(Uri uri, List<dynamic> path, dynamic value) async {
+    throw UnimplementedError('Updating to HTTP sources is not implemented.');
+  }
+
+  /// Updates the value at the specified path in the data in memory and saves the updated data to a file.
+  Future<bool> _updateToFile(List<dynamic> path, dynamic value) async {
+    if (_data == null || path.isEmpty) return false;
+    dynamic parent = getElementAt(path.sublist(0, path.length - 1));
+    final keyOrIndex = path.last;
     if (parent is Map) {
-      // If the parent element is a map, update the key with the new value.
       parent[keyOrIndex] = value;
+      await _saveToFile(Uri.file(_source));
       return true;
     } else if (parent is List &&
         keyOrIndex is int &&
         keyOrIndex < parent.length) {
-      // If the parent element is a list, update the index with the new value.
       parent[keyOrIndex] = value;
+      await _saveToFile(Uri.file(_source));
       return true;
     }
-    return false; // If the operation did not succeed, return false.
+    return false;
   }
 
-  /// Deletes the value at the specified path in the JSON structure.
-  bool delete(List<dynamic> path) {
-    if (_data == null || path.isEmpty)
-      return false; // If the data is null or path is empty, return false.
-    dynamic parent = getElementAt(path.sublist(
-        0, path.length - 1)); // Navigate to the parent element of the path.
-    final keyOrIndex = path
-        .last; // The last element of the path is the key or index to delete.
+  /// Public method to delete an entry from the JSON data at the specified path.
+  Future<bool> delete(List<dynamic> path) async {
+    Uri uri = Uri.parse(_source);
+    return uri.scheme.startsWith('http')
+        ? await _deleteFromHttp(uri, path)
+        : await _deleteFromFile(path);
+  }
 
+  /// Placeholder for deleting an entry from an HTTP source.
+  Future<bool> _deleteFromHttp(Uri uri, List<dynamic> path) async {
+    throw UnimplementedError('Deleting from HTTP sources is not implemented.');
+  }
+
+  /// Deletes the entry at the specified path in the data in memory and saves the updated data to a file.
+  Future<bool> _deleteFromFile(List<dynamic> path) async {
+    if (_data == null || path.isEmpty) return false;
+    dynamic parent = getElementAt(path.sublist(0, path.length - 1));
+    final keyOrIndex = path.last;
     if (parent is Map) {
-      // If the parent element is a map, remove the key/value pair.
       parent.remove(keyOrIndex);
+      await _saveToFile(Uri.file(_source));
       return true;
     } else if (parent is List &&
         keyOrIndex is int &&
         keyOrIndex < parent.length) {
-      // If the parent element is a list, remove the value at the index.
       parent.removeAt(keyOrIndex);
+      await _saveToFile(Uri.file(_source));
       return true;
     }
-    return false; // If the operation did not succeed, return false.
-  }
-
-  /// Saves the current JSON data back to the source.
-  Future<void> save() async {
-    try {
-      Uri uri =
-          Uri.parse(_source); // Parse the source string into a Uri object.
-      if (uri.scheme.startsWith('http')) {
-        // If the source is an HTTP(S) URI, implement logic to save data back to the server.
-        // Note: This part of the code is not implemented. You'll need to write the logic for saving data via HTTP.
-      } else {
-        // If the source is a file, write the JSON data back to the file.
-        final file = File(_source);
-        await file.writeAsString(jsonEncode(
-            _data)); // Encode the data to JSON and write it to the file.
-      }
-    } catch (e) {
-      // Catch and rethrow exceptions with a more specific message.
-      throw Exception('Failed to save data: $e');
-    }
+    return false;
   }
 
   /// Retrieves a value from the nested JSON structure given a path of keys/indices.
   dynamic getValue(List<dynamic> path) {
-    dynamic currentData = _data; // Start with the root of the data.
-    for (var key in path) {
-      // Iterate through the path.
-      if (currentData == null) {
-        return null; // If any part of the path is not found, return null.
-      } else if (currentData is Map && currentData.containsKey(key)) {
-        currentData =
-            currentData[key]; // If the current data is a map, access the key.
-      } else if (currentData is List && currentData.asMap().containsKey(key)) {
-        currentData = currentData[
-            key]; // If the current data is a list, access the index.
-      } else {
-        // If the path is invalid, throw an exception.
-        throw Exception('Invalid key or index at $key in path $path');
-      }
-    }
-    return currentData; // Return the value at the end of the path.
+    return getElementAt(path);
   }
 
   /// Helper function to navigate to the element at the given path within the JSON structure.
   dynamic getElementAt(List<dynamic> path) {
-    dynamic element = _data; // Start with the root of the data.
+    dynamic element = _data;
     for (var keyOrIndex in path) {
-      // Iterate through the path.
       if (element is Map && element.containsKey(keyOrIndex)) {
-        element = element[
-            keyOrIndex]; // If the current element is a map, access the key.
+        element = element[keyOrIndex];
       } else if (element is List &&
           keyOrIndex is int &&
           keyOrIndex < element.length) {
-        element = element[
-            keyOrIndex]; // If the current element is a list, access the index.
+        element = element[keyOrIndex];
       } else {
-        // If the path does not exist in the data, throw an exception.
         throw Exception('Path does not exist in the data');
       }
     }
-    return element; // Return the element at the end of the path.
+    return element;
   }
 
-  /// Converts the JSON data to a string with optional pretty printing.
+  /// Converts the JSON data to a string with optional pretty print formatting.
   String toJsonString({bool pretty = false}) {
-    if (_data == null)
-      return 'null'; // If the data is null, return the string 'null'.
-
+    if (_data == null) return 'null';
     if (pretty) {
-      // If pretty printing is requested,
       var encoder = JsonEncoder.withIndent(
-          '  '); // Create a JSON encoder with indentation for pretty printing.
-      return encoder
-          .convert(_data); // Convert the data to a pretty-printed JSON string.
+          '  '); // Two-space indentation for pretty print
+      return encoder.convert(_data);
     } else {
-      return jsonEncode(
-          _data); // Convert the data to a JSON string without pretty printing.
+      return jsonEncode(_data);
     }
   }
 
-  /// Getter to expose the data.
+  /// Getter to expose the raw data.
   dynamic get data => _data;
 }
