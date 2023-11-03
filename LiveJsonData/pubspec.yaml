@@ -1,0 +1,19 @@
+name: live_json_data
+description: A Dart library to handle JSON data from a URL or file transparently.
+version: 0.1.0
+
+environment:
+  sdk: '>=2.15.0 <3.0.0' # Assuming Dart 3 has not been released, we are using the last known stable version.
+
+dependencies:
+  http: ^0.13.3
+ 
+
+dev_dependencies:
+
+  test: ^1.16.8
+
+flutter:
+  # If this package does not depend on Flutter, this section can be omitted.
+
+
