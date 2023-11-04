@@ -14,18 +14,18 @@ Map<String, String> getHeaders({String? bearerToken}) {
   };
 }
 
-Future<void> fetchPosts({String? bearerToken}) async {
+Future<void> fetch({String? bearerToken}) async {
   final response = await http.get(Uri.parse(baseUrl),
       headers: getHeaders(bearerToken: bearerToken));
   if (response.statusCode == 200) {
-    List<dynamic> posts = jsonDecode(response.body);
-    print('Fetched posts: $posts');
+    List<dynamic> items = jsonDecode(response.body);
+    print('Fetched items: $items');
   } else {
     throw Exception('Failed to load posts');
   }
 }
 
-Future<void> createPost({String? bearerToken}) async {
+Future<void> create({String? bearerToken}) async {
   final response = await http.post(
     Uri.parse(baseUrl),
     headers: getHeaders(bearerToken: bearerToken),
@@ -36,13 +36,13 @@ Future<void> createPost({String? bearerToken}) async {
     }),
   );
   if (response.statusCode == 201) {
-    print('Post created: ${response.body}');
+    print('Item created: ${response.body}');
   } else {
-    throw Exception('Failed to create post');
+    throw Exception('Failed to create item');
   }
 }
 
-Future<void> updatePost(int id, {String? bearerToken}) async {
+Future<void> update(int id, {String? bearerToken}) async {
   final response = await http.put(
     Uri.parse('$baseUrl/$id'),
     headers: getHeaders(bearerToken: bearerToken),
@@ -54,13 +54,13 @@ Future<void> updatePost(int id, {String? bearerToken}) async {
     }),
   );
   if (response.statusCode == 200) {
-    print('Post updated: ${response.body}');
+    print('Item updated: ${response.body}');
   } else {
-    throw Exception('Failed to update post');
+    throw Exception('Failed to update item');
   }
 }
 
-Future<void> patchPost(int id, {String? bearerToken}) async {
+Future<void> patch(int id, {String? bearerToken}) async {
   final response = await http.patch(
     Uri.parse('$baseUrl/$id'),
     headers: getHeaders(bearerToken: bearerToken),
@@ -69,32 +69,31 @@ Future<void> patchPost(int id, {String? bearerToken}) async {
     }),
   );
   if (response.statusCode == 200) {
-    print('Post patched: ${response.body}');
+    print('Item patched: ${response.body}');
   } else {
-    throw Exception('Failed to patch post');
+    throw Exception('Failed to patch item');
   }
 }
 
-Future<void> deletePost(int id, {String? bearerToken}) async {
+Future<void> delete(int id, {String? bearerToken}) async {
   final response = await http.delete(
     Uri.parse('$baseUrl/$id'),
     headers: getHeaders(bearerToken: bearerToken),
   );
   if (response.statusCode == 200) {
-    print('Post deleted');
+    print('Item deleted');
   } else {
-    throw Exception('Failed to delete post');
+    throw Exception('Failed to delete item');
   }
 }
 
 void main() async {
   // You would typically pass the bearerToken from secure storage or a config
-  await fetchPosts(bearerToken: bearerToken);
-  await createPost(bearerToken: bearerToken);
-  await updatePost(1,
-      bearerToken: bearerToken); // Assuming there's a post with ID 1
-  await patchPost(1,
-      bearerToken: bearerToken); // Assuming there's a post with ID 1
-  await deletePost(1,
-      bearerToken: bearerToken); // Assuming there's a post with ID 1
+  await fetch(bearerToken: bearerToken);
+  await create(bearerToken: bearerToken);
+  await update(1,
+      bearerToken: bearerToken); // Assuming there's a item with ID 1
+  await patch(1, bearerToken: bearerToken); // Assuming there's a item with ID 1
+  await delete(1,
+      bearerToken: bearerToken); // Assuming there's a item with ID 1
 }
