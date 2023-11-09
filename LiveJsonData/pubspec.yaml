@@ -8,7 +8,7 @@ environment:
 dependencies:
   http: ^0.13.3
   meta: ^1.7.0  # So, that subclasses can override protected methods
- 
+  json_http_api: ^1.0.0  # local package name in this folder
 
 dev_dependencies:
 
