@@ -41,6 +41,13 @@ class FileJsonData extends AbstractJsonData {
     }
   }
 
+/**  @override
+  Future<bool> add(List path, Map<String, dynamic> newItem) {
+    // TODO: implement add
+    throw UnimplementedError();
+  }
+ */
+
   @override
   Future<bool> delete(List path) {
     // TODO: implement delete

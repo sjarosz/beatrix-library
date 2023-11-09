@@ -68,9 +68,42 @@ class HttpJsonData extends AbstractJsonData {
     }
   }
 
+/**  @override
+  bool add(List<dynamic> path, dynamic newItem, {Function(bool)? callback}) {
+    print('CURRENT: ' + data.toString());
+    var response = http.post(
+      Uri.parse('$apiUrl/${pathToString(path)}'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(newItem),
+    );
+    print(response.body);
+    return response.statusCode == 200;
+  }
+ */
+
   @override
-  Future<bool> delete(List path) {
-    // TODO: implement delete
-    throw UnimplementedError();
+  Future<bool> delete(List<dynamic> path) async {
+    var response = await http.delete(
+      Uri.parse('$apiUrl/${pathToString(path)}'),
+    );
+    print(response.body);
+
+    return response.statusCode == 200;
+  }
+
+  // PATCH method implementation
+  Future<bool> patch(List<dynamic> path, dynamic newValue) async {
+    var response = await http.patch(
+      Uri.parse('$apiUrl/${pathToString(path)}'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(newValue),
+    );
+    print(response.body);
+
+    return response.statusCode == 200;
   }
 }
