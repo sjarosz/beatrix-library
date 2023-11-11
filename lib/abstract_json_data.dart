@@ -13,19 +13,44 @@ abstract class AbstractJsonData {
   }
 
   Future<void> fetch();
-  bool add(List<dynamic> path, dynamic newEntry) {
+
+  bool delete(List<dynamic> path, Function(bool) callback) {
+    if (_data == null || path.isEmpty) return false;
+
+    dynamic parent = getElementAt(path.sublist(0, path.length - 1));
+    final keyOrIndex = path.last;
+
+    if (parent is Map && parent.containsKey(keyOrIndex)) {
+      parent.remove(keyOrIndex);
+      return true;
+    } else if (parent is List &&
+        keyOrIndex is int &&
+        keyOrIndex < parent.length) {
+      parent.removeAt(keyOrIndex);
+      return true;
+    }
+    return false;
+  }
+
+  bool add(List<dynamic> path, dynamic newEntry, Function(bool) callback) {
     dynamic parent = getElementAt(path);
     if (parent is List) {
       parent.add(newEntry);
+      callback(true);
+
       return true;
     } else if (parent is Map) {
       if (newEntry is! Map) {
+        callback(false);
+
         throw Exception(
             'New entry must be a Map to add to a Map data structure');
       }
       parent.addAll(newEntry);
+      callback(true);
       return true;
     }
+    callback(false);
     return false;
   }
 
@@ -45,12 +70,10 @@ abstract class AbstractJsonData {
     return false;
   }
 
-  Future<bool> delete(List<dynamic> path);
-
-  /// Retrieves a value from the nested JSON structure given a path of keys/indices.
-  ///
-  /// The [path] is a list of strings or integers representing keys or indices in the JSON data.
   dynamic getValue(List<dynamic> path) {
+    /// Retrieves a value from the nested JSON structure given a path of keys/indices.
+    ///
+    /// The [path] is a list of strings or integers representing keys or indices in the JSON data.
     dynamic currentData = _data;
     for (var key in path) {
       if (currentData == null) {

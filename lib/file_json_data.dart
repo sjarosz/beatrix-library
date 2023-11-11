@@ -5,9 +5,10 @@ import 'package:live_json_data/abstract_json_data.dart';
 
 class FileJsonData extends AbstractJsonData {
   final String filePath;
-  //FileJsonData(this.filePath, [Map<String, dynamic>? initialData])
+  FileJsonData(this.filePath, [Map<String, dynamic>? initialData])
+      : super(initialData);
 
-  FileJsonData(this.filePath, [dynamic initialData]) : super(initialData);
+  //FileJsonData(this.filePath, [dynamic initialData]) : super(initialData);
 
   @override
   Future<void> fetch() async {
@@ -41,9 +42,11 @@ class FileJsonData extends AbstractJsonData {
     }
   }
 
-  @override
+  /** @override
   Future<bool> delete(List path) {
     // TODO: implement delete
     throw UnimplementedError();
   }
+
+   */
 }
