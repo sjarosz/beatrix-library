@@ -42,13 +42,19 @@ abstract class AbstractJsonData {
     final keyOrIndex = path.last;
     if (parent is Map) {
       parent[keyOrIndex] = newValue;
+      callback(true);
+
       return true;
     } else if (parent is List &&
         keyOrIndex is int &&
         keyOrIndex < parent.length) {
       parent[keyOrIndex] = newValue;
+      callback(true);
+
       return true;
     }
+    callback(false);
+
     return false;
   }
 

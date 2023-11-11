@@ -2,7 +2,7 @@
 import 'package:live_json_data/file_json_data.dart';
 import 'package:live_json_data/http_json_data.dart';
 
-void main() {
+void main() async {
   var initialData = {'someKey': 'someValue'};
 
   var fileJsonData = FileJsonData(
@@ -40,11 +40,11 @@ void main() {
 
   var httpJsonData =
       HttpJsonData('http://localhost:5174/data.json', initialData);
-  httpJsonData.fetch(); // Fetches or uses initialData if provided
+  await httpJsonData.fetch(); // Fetches or uses initialData if provided
 
   // Updating an entry in 'batter'
   //print('\nUpdating batter type...');
-  httpJsonData.update(['batters', 'batter', 0, 'type'], 'New Type',
+  await httpJsonData.update(['batters', 'batter', 0, 'type'], 'New Type',
       (bool callback) {
     if (callback) {
       fileJsonData.data = httpJsonData.data;
@@ -58,7 +58,7 @@ void main() {
   // Adding a new entry to the 'topping' array
   //print('\nAdding a new topping...');
   var newTopping = {'id': '5008', 'type': 'Strawberry'};
-  httpJsonData.add(['topping'], newTopping, (bool callback) {
+  await httpJsonData.add(['topping'], newTopping, (bool callback) {
     if (callback) {
       fileJsonData.data = httpJsonData.data;
       fileJsonData.save();
@@ -71,7 +71,7 @@ void main() {
 //  print('Topping added: ${httpJsonData.data}');
 //  print('Data after addition: ${httpJsonData.data}');
 
-  httpJsonData.delete(['topping'], newTopping, (bool callback) {
+  await httpJsonData.delete(['topping'], newTopping, (bool callback) {
     if (callback) {
       fileJsonData.data = httpJsonData.data;
       fileJsonData.save();
