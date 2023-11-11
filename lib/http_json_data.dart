@@ -2,126 +2,99 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:live_json_data/abstract_json_data.dart';
+//import 'xhttp_service.dart'; // Ensure you import the XHttpService class correctly
 
 class XHttpService {
-  patchAsync(String url, List<dynamic> path, dynamic newValue,
-      Function callback) async {
-//      Uri.parse('$apiUrl/${pathToString(path)}'),
-
+  Future<bool> patchAsync(String url, dynamic newValue) async {
     try {
-      var response = await http
-          .patch(
-        Uri.parse('https://httpbin.org/anything/X}'),
+      url = 'https://httpbin.org/anything/X}';
+
+      var response = await http.patch(
+        Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(newValue),
-      )
-          .then((response) {
-        if (response.statusCode == 200) {
-          print('HTTP Update success');
-          callback(true);
-        } else
-          callback(false);
-      });
+      );
       print(response.body);
+      return response.statusCode == 200;
     } catch (e) {
-      return {'success': false, 'message': 'Error occurred: $e'};
+      print('Error occurred: $e');
+      return false;
     }
   }
 
-  getAsync(String url, List<dynamic> path, dynamic newValue,
-      Function callback) async {
-//      Uri.parse('$apiUrl/${pathToString(path)}'),
-
+  Future<bool> getAsync(String url) async {
     try {
+      url = 'https://httpbin.org/anything/X}';
+
       var response = await http.get(
-          Uri.parse('https://httpbin.org/anything/X}'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          }).then((response) {
-        if (response.statusCode == 200) {
-          print('HTTP Update success');
-          callback(true);
-        } else
-          callback(false);
-      });
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
       print(response.body);
+      return response.statusCode == 200;
     } catch (e) {
-      return {'success': false, 'message': 'Error occurred: $e'};
+      print('Error occurred: $e');
+      return false;
     }
   }
 
-  postAsync(String url, List<dynamic> path, dynamic newValue,
-      Function callback) async {
-//      Uri.parse('$apiUrl/${pathToString(path)}'),
-
+  Future<bool> postAsync(String url, dynamic newValue) async {
     try {
-      var response = await http
-          .post(
-        Uri.parse('https://httpbin.org/anything/X}'),
+      url = 'https://httpbin.org/anything/X}';
+
+      var response = await http.post(
+        Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(newValue),
-      )
-          .then((response) {
-        if (response.statusCode == 200) {
-          print('HTTP ADD success: ' + response.body);
-          callback(true);
-        } else
-          callback(false);
-      });
+      );
       print(response.body);
+      return response.statusCode == 200;
     } catch (e) {
-      return {'success': false, 'message': 'Error occurred: $e'};
+      print('Error occurred: $e');
+      return false;
     }
   }
 
-  putAsync(String url, List<dynamic> path, dynamic newValue,
-      Function callback) async {
-//      Uri.parse('$apiUrl/${pathToString(path)}'),
-
+  Future<bool> putAsync(String url, dynamic newValue) async {
     try {
-      var response = await http
-          .put(
-        Uri.parse('https://httpbin.org/anything/X}'),
+      url = 'https://httpbin.org/anything/X}';
+
+      var response = await http.put(
+        Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(newValue),
-      )
-          .then((response) {
-        if (response.statusCode == 200) {
-          print('HTTP Update success: ' + response.body);
-          callback(true);
-        } else
-          callback(false);
-      });
+      );
       print(response.body);
+      return response.statusCode == 200;
     } catch (e) {
-      return {'success': false, 'message': 'Error occurred: $e'};
+      print('Error occurred: $e');
+      return false;
     }
   }
 
-  deleteAsync(String url, List<dynamic> path, Function callback) async {
-//      Uri.parse('$apiUrl/${pathToString(path)}'),
-
+  Future<bool> deleteAsync(String url) async {
     try {
+      url = 'https://httpbin.org/anything/X}';
+
       var response = await http.delete(
-          Uri.parse('https://httpbin.org/anything/X}'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          }).then((response) {
-        if (response.statusCode == 200) {
-          print('HTTP Delete success: ' + response.body);
-          callback(true);
-        } else
-          callback(false);
-      });
+        Uri.parse(url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
       print(response.body);
+      return response.statusCode == 200;
     } catch (e) {
-      return {'success': false, 'message': 'Error occurred: $e'};
+      print('Error occurred: $e');
+      return false;
     }
   }
 }
@@ -132,49 +105,39 @@ class HttpJsonData extends AbstractJsonData {
   HttpJsonData(this.apiUrl, [dynamic initialData]) : super(initialData);
 
   @override
-  bool update(List<dynamic> path, dynamic newValue, Function(bool) callback) {
-//      Uri.parse('$apiUrl/${pathToString(path)}'),
-
+  Future<bool> update(List<dynamic> path, dynamic newValue) async {
     var httpService = XHttpService();
-
-    httpService.putAsync(
-        'https://jsonplaceholder.typicode.com/todos/1', path, newValue,
-        (bool success) {
-      if (success) {
-        bool superSuccess = super.update(
-            path, newValue, (bool) {}); //invoke in common update functions.
-        //Process in memory object
-        callback(superSuccess);
-      } else {
-        print('Failure');
-        callback(false);
-      }
-    });
-    return true;
+    bool success = await httpService.putAsync(apiUrl, newValue);
+    if (success) {
+      return super.update(path, newValue);
+    } else {
+      print('HTTP update failure');
+      return false;
+    }
   }
 
-  /**   DIVIDER  */
+  @override
+  Future<bool> add(List<dynamic> path, dynamic newEntry) async {
+    var httpService = XHttpService();
+    bool success = await httpService.postAsync(apiUrl, newEntry);
+    if (success) {
+      return super.add(path, newEntry);
+    } else {
+      print('HTTP add failure');
+      return false;
+    }
+  }
 
   @override
-  bool add(List<dynamic> path, dynamic newEntry, Function(bool) callback) {
-//      Uri.parse('$apiUrl/${pathToString(path)}'),
-
+  Future<bool> delete(List<dynamic> path, dynamic entryToRemove) async {
     var httpService = XHttpService();
-
-    httpService.postAsync(
-        'https://jsonplaceholder.typicode.com/todos/1', path, newEntry,
-        (bool success) {
-      if (success) {
-        bool superSuccess = super
-            .add(path, newEntry, (bool) {}); //invoke in common add functions.
-        //Process in memory object
-        callback(superSuccess);
-      } else {
-        print('Failure');
-        callback(false);
-      }
-    });
-    return true;
+    bool success = await httpService.deleteAsync(apiUrl);
+    if (success) {
+      return super.delete(path, entryToRemove);
+    } else {
+      print('HTTP delete failure');
+      return false;
+    }
   }
 
   @override
@@ -185,27 +148,5 @@ class HttpJsonData extends AbstractJsonData {
     } else {
       throw Exception('Failed to load data');
     }
-  }
-
-  @override
-  bool delete(
-      List<dynamic> path, dynamic entryToRemove, Function(bool) callback) {
-//      Uri.parse('$apiUrl/${pathToString(path)}'),
-
-    var httpService = XHttpService();
-
-    httpService.deleteAsync(
-        'https://jsonplaceholder.typicode.com/todos/1', path, (bool success) {
-      if (success) {
-        bool superSuccess = super.delete(path, entryToRemove,
-            (bool) {}); //invoke in common delete functions.
-        //Process in memory object
-        callback(superSuccess);
-      } else {
-        print('Failure');
-        callback(false);
-      }
-    });
-    return true;
   }
 }

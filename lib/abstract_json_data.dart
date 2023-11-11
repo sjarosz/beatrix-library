@@ -14,59 +14,58 @@ abstract class AbstractJsonData {
 
   Future<void> fetch();
 
-  bool add(List<dynamic> path, dynamic newEntry, Function(bool) callback) {
+  Future<bool> add(List<dynamic> path, dynamic newEntry) async {
     dynamic parent = getElementAt(path);
     if (parent is List) {
       parent.add(newEntry);
-      callback(true);
+      // callback(true);
 
       return true;
     } else if (parent is Map) {
       if (newEntry is! Map) {
-        callback(false);
+        // callback(false);
 
         throw Exception(
             'New entry must be a Map to add to a Map data structure');
       }
       parent.addAll(newEntry);
-      callback(true);
+      // callback(true);
       return true;
     }
-    callback(false);
+    // callback(false);
     return false;
   }
 
-  bool update(List<dynamic> path, dynamic newValue, Function(bool) callback) {
+  Future<bool> update(List<dynamic> path, dynamic newValue) async {
     if (_data == null || path.isEmpty) return false;
     dynamic parent = getElementAt(path.sublist(0, path.length - 1));
     final keyOrIndex = path.last;
     if (parent is Map) {
       parent[keyOrIndex] = newValue;
-      callback(true);
+      // callback(true);
 
       return true;
     } else if (parent is List &&
         keyOrIndex is int &&
         keyOrIndex < parent.length) {
       parent[keyOrIndex] = newValue;
-      callback(true);
+      // callback(true);
 
       return true;
     }
-    callback(false);
+    //  callback(false);
 
     return false;
   }
 
-  bool delete(
-      List<dynamic> path, dynamic entryToRemove, Function(bool) callback) {
+  Future<bool> delete(List<dynamic> path, dynamic entryToRemove) async {
     dynamic parent = getElementAt(path);
 
     if (parent is List) {
       // In a List, remove the last element added (assuming 'add' appends to the end).
       if (parent.isNotEmpty && parent.last == entryToRemove) {
         parent.removeLast();
-        callback(true);
+        // callback(true);
         return true;
       }
     } else if (parent is Map) {
@@ -77,12 +76,12 @@ abstract class AbstractJsonData {
             parent.remove(key);
           }
         }
-        callback(true);
+        //   callback(true);
         return true;
       }
     }
 
-    callback(false);
+    // callback(false);
     return false;
   }
 
