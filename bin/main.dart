@@ -2,12 +2,12 @@
 import 'package:live_json_data/file_json_data.dart';
 import 'package:live_json_data/http_json_data.dart';
 
-void main() async {
+void main() {
   var initialData = {'someKey': 'someValue'};
 
   var fileJsonData = FileJsonData(
       '/Users/sjarosz/project/beatrix-library/data/data.json', initialData);
-  await fileJsonData.fetch(); // Fetches or uses initialData if provided
+  fileJsonData.fetch(); // Fetches or uses initialData if provided
   print('Initial File data: ${fileJsonData.data}');
 
 /**
@@ -40,51 +40,47 @@ void main() async {
 
   var httpJsonData =
       HttpJsonData('http://localhost:5174/data.json', initialData);
-  await httpJsonData.fetch(); // Fetches or uses initialData if provided
+  httpJsonData.fetch(); // Fetches or uses initialData if provided
 
   // Updating an entry in 'batter'
-  print('\nUpdating batter type...');
+  //print('\nUpdating batter type...');
   httpJsonData.update(['batters', 'batter', 0, 'type'], 'New Type',
       (bool callback) {
     if (callback) {
       fileJsonData.data = httpJsonData.data;
       fileJsonData.save();
-      print('Data after updateX: ${fileJsonData.data}');
+      print('Data after update: ${fileJsonData.data}');
     } else {
       print('Error: 000 ');
     }
   });
 
   // Adding a new entry to the 'topping' array
-  print('\nAdding a new topping...');
+  //print('\nAdding a new topping...');
   var newTopping = {'id': '5008', 'type': 'Strawberry'};
   httpJsonData.add(['topping'], newTopping, (bool callback) {
     if (callback) {
       fileJsonData.data = httpJsonData.data;
       fileJsonData.save();
 
-      print('Data after update: ${httpJsonData.data}');
+      print('Data after ADD: ${fileJsonData.data}');
     } else {
       print('Error: Invalid Request for add');
     }
   });
-  print('Topping added: ${httpJsonData.data}');
-  print('Data after addition: ${httpJsonData.data}');
+//  print('Topping added: ${httpJsonData.data}');
+//  print('Data after addition: ${httpJsonData.data}');
 
-  /**
-
-  httpJsonData.delete(['topping'], (bool callback) {
+  httpJsonData.delete(['topping'], newTopping, (bool callback) {
     if (callback) {
       fileJsonData.data = httpJsonData.data;
       fileJsonData.save();
 
-      print('Data after update: ${httpJsonData.data}');
+      print('Data after delete: ${fileJsonData.data}');
     } else {
-      print('Error: Invalid Request for add');
+      print('Error: Invalid Request for DELETE');
     }
   });
-  print('Topping deleted: ${httpJsonData.data}');
-  print('Data after deletion: ${httpJsonData.data}');
-
- */
+//  print('Topping deleted: ${httpJsonData.data}');
+//  print('Data after deletion: ${httpJsonData.data}');
 }

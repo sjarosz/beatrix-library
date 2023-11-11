@@ -153,6 +153,8 @@ class HttpJsonData extends AbstractJsonData {
     return true;
   }
 
+  /**   DIVIDER  */
+
   @override
   bool add(List<dynamic> path, dynamic newEntry, Function(bool) callback) {
 //      Uri.parse('$apiUrl/${pathToString(path)}'),
@@ -186,7 +188,8 @@ class HttpJsonData extends AbstractJsonData {
   }
 
   @override
-  bool delete(List<dynamic> path, Function(bool) callback) {
+  bool delete(
+      List<dynamic> path, dynamic entryToRemove, Function(bool) callback) {
 //      Uri.parse('$apiUrl/${pathToString(path)}'),
 
     var httpService = XHttpService();
@@ -194,8 +197,8 @@ class HttpJsonData extends AbstractJsonData {
     httpService.deleteAsync(
         'https://jsonplaceholder.typicode.com/todos/1', path, (bool success) {
       if (success) {
-        bool superSuccess =
-            super.delete(path, (bool) {}); //invoke in common delete functions.
+        bool superSuccess = super.delete(path, entryToRemove,
+            (bool) {}); //invoke in common delete functions.
         //Process in memory object
         callback(superSuccess);
       } else {

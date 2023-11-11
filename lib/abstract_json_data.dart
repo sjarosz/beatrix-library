@@ -14,24 +14,6 @@ abstract class AbstractJsonData {
 
   Future<void> fetch();
 
-  bool delete(List<dynamic> path, Function(bool) callback) {
-    if (_data == null || path.isEmpty) return false;
-
-    dynamic parent = getElementAt(path.sublist(0, path.length - 1));
-    final keyOrIndex = path.last;
-
-    if (parent is Map && parent.containsKey(keyOrIndex)) {
-      parent.remove(keyOrIndex);
-      return true;
-    } else if (parent is List &&
-        keyOrIndex is int &&
-        keyOrIndex < parent.length) {
-      parent.removeAt(keyOrIndex);
-      return true;
-    }
-    return false;
-  }
-
   bool add(List<dynamic> path, dynamic newEntry, Function(bool) callback) {
     dynamic parent = getElementAt(path);
     if (parent is List) {
@@ -67,6 +49,34 @@ abstract class AbstractJsonData {
       parent[keyOrIndex] = newValue;
       return true;
     }
+    return false;
+  }
+
+  bool delete(
+      List<dynamic> path, dynamic entryToRemove, Function(bool) callback) {
+    dynamic parent = getElementAt(path);
+
+    if (parent is List) {
+      // In a List, remove the last element added (assuming 'add' appends to the end).
+      if (parent.isNotEmpty && parent.last == entryToRemove) {
+        parent.removeLast();
+        callback(true);
+        return true;
+      }
+    } else if (parent is Map) {
+      // In a Map, remove the entry by its key.
+      if (entryToRemove is Map) {
+        for (var key in entryToRemove.keys) {
+          if (parent.containsKey(key)) {
+            parent.remove(key);
+          }
+        }
+        callback(true);
+        return true;
+      }
+    }
+
+    callback(false);
     return false;
   }
 
