@@ -2,102 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:live_json_data/abstract_json_data.dart';
-//import 'xhttp_service.dart'; // Ensure you import the XHttpService class correctly
-
-class XHttpService {
-  Future<bool> patchAsync(String url, dynamic newValue) async {
-    try {
-      url = 'https://httpbin.org/anything/X}';
-
-      var response = await http.patch(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(newValue),
-      );
-      print(response.body);
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Error occurred: $e');
-      return false;
-    }
-  }
-
-  Future<bool> getAsync(String url) async {
-    try {
-      url = 'https://httpbin.org/anything/X}';
-
-      var response = await http.get(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-      );
-      print(response.body);
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Error occurred: $e');
-      return false;
-    }
-  }
-
-  Future<bool> postAsync(String url, dynamic newValue) async {
-    try {
-      url = 'https://httpbin.org/anything/X}';
-
-      var response = await http.post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(newValue),
-      );
-      print(response.body);
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Error occurred: $e');
-      return false;
-    }
-  }
-
-  Future<bool> putAsync(String url, dynamic newValue) async {
-    try {
-      url = 'https://httpbin.org/anything/X}';
-
-      var response = await http.put(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(newValue),
-      );
-      print(response.body);
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Error occurred: $e');
-      return false;
-    }
-  }
-
-  Future<bool> deleteAsync(String url) async {
-    try {
-      url = 'https://httpbin.org/anything/X}';
-
-      var response = await http.delete(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-      );
-      print(response.body);
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Error occurred: $e');
-      return false;
-    }
-  }
-}
+import 'xhttp_service.dart'; // Ensure you import the XHttpService class correctly
 
 class HttpJsonData extends AbstractJsonData {
   final String apiUrl;
@@ -142,11 +47,8 @@ class HttpJsonData extends AbstractJsonData {
 
   @override
   Future<void> fetch() async {
-    var response = await http.get(Uri.parse(apiUrl));
-    if (response.statusCode == 200) {
-      data = jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to load data');
-    }
+    var httpService = XHttpService();
+    var json = await httpService.getAsync(apiUrl);
+    super.data = json;
   }
 }
